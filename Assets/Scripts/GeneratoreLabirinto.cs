@@ -1,3 +1,4 @@
+using Mono.Cecil;
 using NUnit;
 using System;
 using System.Collections;
@@ -10,13 +11,15 @@ using UnityEngine;
 
 public class MazeGenerator : MonoBehaviour
 {
-    [SerializeField]
-    Cella CellaPrefab;
+    [SerializeField] Cella CellaPrefab;
+    [SerializeField] GameObject CellaEntrataUscitaPrefab;
 
-    int larghezza;
-    int lunghezza;
     Cella[,] percorso;
     System.Random random;
+
+    public Cella CellaEntrata { get; private set; }
+    public int larghezza { get; private set; }
+    public int lunghezza { get; private set; }
 
     void Start()
     {
@@ -59,19 +62,50 @@ public class MazeGenerator : MonoBehaviour
 
     private void GeneraEntrataUscita()
     {
-        Cella entrata;
+        //Cella entrata;
         Cella uscita;
 
-        entrata = GeneraCellaSulBordo();
+        CellaEntrata = GeneraCellaSulBordo();
+        PosizionaCellaEntrataUscita();
         do
         {
             uscita = GeneraCellaSulBordo();
         }
         //rigenera se sono uguali, sono nello stesso lato
-        while (entrata==uscita ||GetLatoCella(entrata) == GetLatoCella(uscita));
+        while (CellaEntrata == uscita ||GetLatoCella(CellaEntrata) == GetLatoCella(uscita));
 
-        ScavaMuroEntrataUscita(entrata);
+        ScavaMuroEntrataUscita(CellaEntrata);
         ScavaMuroEntrataUscita(uscita);
+    }
+
+    private void PosizionaCellaEntrataUscita()
+    {
+
+        Vector3 scala = transform.lossyScale;
+        Vector3 direzione = Vector3.zero;
+
+        if (CellaEntrata.x == 0) direzione = Vector3.left;
+        else if (CellaEntrata.x == larghezza - 1) direzione = Vector3.right;
+        else if (CellaEntrata.z == 0) direzione = Vector3.back;
+        else if (CellaEntrata.z == lunghezza - 1) direzione = Vector3.forward;
+
+        // posizione della cella di entrata (stessa logica delle altre)
+        Vector3 posizione = new Vector3(
+            CellaEntrata.x * scala.x,
+            0,
+            CellaEntrata.z * scala.z
+        );
+
+        //sposta di una cella verso esterno
+        posizione += direzione * scala.x; //x o z è uguale se celle quadrate
+
+        Instantiate(
+            CellaEntrataUscitaPrefab,
+            posizione,
+            Quaternion.LookRotation(-direzione),
+            transform
+        );
+
     }
 
     private Cella GeneraCellaSulBordo()
