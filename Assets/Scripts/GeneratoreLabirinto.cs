@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -13,11 +15,12 @@ public class MazeGenerator : MonoBehaviour
 {
     [SerializeField] Cella CellaPrefab;
     [SerializeField] GameObject CellaEntrataUscitaPrefab;
+    [SerializeField] GameObject PressurePlatePrefab;
 
     Cella[,] percorso;
     System.Random random;
 
-    public Cella CellaEntrata { get; private set; }
+    public Cella CellaEntrata { get; set; }
     public int larghezza { get; private set; }
     public int lunghezza { get; private set; }
 
@@ -25,38 +28,40 @@ public class MazeGenerator : MonoBehaviour
     {
         random = new System.Random(Environment.TickCount);
 
-        lunghezza = 15;
-        larghezza = 15;
+        lunghezza = 10;
+        larghezza = 10;
         //lunghezza = random.Next(15,25);
         //larghezza = random.Next(15,25);
 
-        percorso = new Cella[larghezza, lunghezza];
-        Vector3 scala;
-        Vector3 posizione;
-        for (int x = 0; x < larghezza; x++)
-        {
-            for (int y = 0; y < lunghezza; y++)
-            {
-                scala = transform.lossyScale;   //è la scala dell' oggetto (impostato nel menu inspector per esempio
-                //così se si modifica quello tutte le celle (figlie) si adattano a quella del padre (questa, il labirinto)ù
+        Rigenera();
 
-                posizione = new Vector3(x * scala.x, 0, y * scala.z);   //ogni celle è posizionata in base alla scala del padre
-                percorso[x, y] = Instantiate(CellaPrefab, posizione, Quaternion.identity, transform);
-                //con trasform allora tutte le istanze delle celle diventano anche figlie del labitinto, e quindi assumono la scala predefinita impostata nel labirinto
-                percorso[x, y].x = x;
-                percorso[x, y].z = y;
-            }
-        }
-        GeneraLabirinto(null, percorso[0, 0]);
+        //percorso = new Cella[larghezza, lunghezza];
+        //Vector3 scala;
+        //Vector3 posizione;
+        //for (int x = 0; x < larghezza; x++)
+        //{
+        //    for (int y = 0; y < lunghezza; y++)
+        //    {
+        //        scala = transform.lossyScale;   //è la scala dell' oggetto (impostato nel menu inspector per esempio
+        //        //così se si modifica quello tutte le celle (figlie) si adattano a quella del padre (questa, il labirinto)ù
+
+        //        posizione = new Vector3(x * scala.x, 0, y * scala.z);   //ogni celle è posizionata in base alla scala del padre
+        //        percorso[x, y] = Instantiate(CellaPrefab, posizione, Quaternion.identity, transform);
+        //        //con trasform allora tutte le istanze delle celle diventano anche figlie del labitinto, e quindi assumono la scala predefinita impostata nel labirinto
+        //        percorso[x, y].x = x;
+        //        percorso[x, y].z = y;
+        //    }
+        //}
+        //GeneraLabirinto(null, percorso[0, 0]);
 
 
-        //quando arriva alla fine di tutte le chiamate ricorsive allora crea l'entrata, uscita e aggiorna la grafica
-        GeneraEntrataUscita();
+        ////quando arriva alla fine di tutte le chiamate ricorsive allora crea l'entrata, uscita e aggiorna la grafica
+        //GeneraEntrataUscita();
 
-        foreach (Cella cell in percorso)
-        {
-            cell.AggiornaGrafica();
-        }
+        //foreach (Cella cell in percorso)
+        //{
+        //    cell.AggiornaGrafica();
+        //}
 
     }
 
@@ -66,7 +71,8 @@ public class MazeGenerator : MonoBehaviour
         Cella uscita;
 
         CellaEntrata = GeneraCellaSulBordo();
-        PosizionaCellaEntrataUscita();
+        
+        PosizionaCellaEntrataUscita(CellaEntrata, "entrata");
         do
         {
             uscita = GeneraCellaSulBordo();
@@ -76,24 +82,28 @@ public class MazeGenerator : MonoBehaviour
 
         ScavaMuroEntrataUscita(CellaEntrata);
         ScavaMuroEntrataUscita(uscita);
+
+        PosizionaCellaEntrataUscita(uscita, "uscita");
+        //PosizionaPlateUscita(uscita);
+
     }
 
-    private void PosizionaCellaEntrataUscita()
+    private void PosizionaCellaEntrataUscita(Cella cel, string tipo)
     {
 
         Vector3 scala = transform.lossyScale;
         Vector3 direzione = Vector3.zero;
 
-        if (CellaEntrata.x == 0) direzione = Vector3.left;
-        else if (CellaEntrata.x == larghezza - 1) direzione = Vector3.right;
-        else if (CellaEntrata.z == 0) direzione = Vector3.back;
-        else if (CellaEntrata.z == lunghezza - 1) direzione = Vector3.forward;
+        if (cel.x == 0) direzione = Vector3.left;
+        else if (cel.x == larghezza - 1) direzione = Vector3.right;
+        else if (cel.z == 0) direzione = Vector3.back;
+        else if (cel.z == lunghezza - 1) direzione = Vector3.forward;
 
         // posizione della cella di entrata (stessa logica delle altre)
         Vector3 posizione = new Vector3(
-            CellaEntrata.x * scala.x,
+            cel.x * scala.x,
             0,
-            CellaEntrata.z * scala.z
+            cel.z * scala.z
         );
 
         //sposta di una cella verso esterno
@@ -105,6 +115,19 @@ public class MazeGenerator : MonoBehaviour
             Quaternion.LookRotation(-direzione),
             transform
         );
+
+        if (tipo == "entrata")
+        {
+            return;
+        }
+        else if (tipo == "uscita")
+        {
+            Vector3 posizionePressure = new Vector3(posizione.x, 1, posizione.z);
+            GameObject plate = Instantiate(PressurePlatePrefab, posizionePressure, Quaternion.identity, transform);
+            plate.transform.localScale = PressurePlatePrefab.transform.localScale;
+            
+            //plate.transform.position += Vector3.up * (plate.transform.localScale.y * 0.5f);
+        }
 
     }
 
@@ -262,6 +285,46 @@ public class MazeGenerator : MonoBehaviour
         }
 
         return;
+    }
+
+
+    public void Rigenera()
+    {  
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        CellaEntrata = null;
+
+        percorso = new Cella[larghezza, lunghezza];
+        Vector3 scala;
+        Vector3 posizione;
+        for (int x = 0; x < larghezza; x++)
+        {
+            for (int y = 0; y < lunghezza; y++)
+            {
+                scala = transform.lossyScale;   //è la scala dell' oggetto (impostato nel menu inspector per esempio
+                //così se si modifica quello tutte le celle (figlie) si adattano a quella del padre (questa, il labirinto)ù
+
+                posizione = new Vector3(x * scala.x, 0, y * scala.z);   //ogni celle è posizionata in base alla scala del padre
+                percorso[x, y] = Instantiate(CellaPrefab, posizione, Quaternion.identity, transform);
+                //con trasform allora tutte le istanze delle celle diventano anche figlie del labitinto, e quindi assumono la scala predefinita impostata nel labirinto
+                percorso[x, y].x = x;
+                percorso[x, y].z = y;
+            }
+        }
+        GeneraLabirinto(null, percorso[0, 0]);
+
+
+        //quando arriva alla fine di tutte le chiamate ricorsive allora crea l'entrata, uscita e aggiorna la grafica
+        GeneraEntrataUscita();
+
+        foreach (Cella cell in percorso)
+        {
+            cell.AggiornaGrafica();
+        }
+
     }
 
 }

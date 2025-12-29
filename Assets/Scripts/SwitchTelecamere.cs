@@ -16,7 +16,7 @@ public class SwitchTelecamere : MonoBehaviour
     //CONSAPEVOLE DELL' ESISTENZA DI CINEMACHINE MA VOLEVO PROVARE A FARLO MANUALMENTE  
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
 
         prima_persona = true;
         primaPersona.gameObject.SetActive(true);

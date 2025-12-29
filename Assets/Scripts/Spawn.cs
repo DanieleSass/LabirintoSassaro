@@ -6,9 +6,22 @@ public class Spawn : MonoBehaviour
     [SerializeField] MazeGenerator GeneratoreLabirinito;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    async void Start()
+    void Start()
     {
-        //aspetta che il labirinto si crei
+        EseguiSpawn();
+
+    }
+
+    private async Task AspettaGenerazioneLabirinto()
+    {
+        while(GeneratoreLabirinito.CellaEntrata == null)
+        {
+            await Task.Yield();
+        }
+    }
+
+    public async Task EseguiSpawn()
+    {
         await AspettaGenerazioneLabirinto();
 
         Cella entrata = GeneratoreLabirinito.CellaEntrata;
@@ -21,9 +34,13 @@ public class Spawn : MonoBehaviour
         else if (entrata.z == GeneratoreLabirinito.lunghezza - 1) direzione = Vector3.forward;
 
         //posizione della cella di entrata
-        Vector3 posizione = new Vector3( entrata.x * scala.x, 0, entrata.z * scala.z );
+        Vector3 posizione = new Vector3(entrata.x * scala.x, 0, entrata.z * scala.z);
         //sposta di una cella verso l’esterno
         posizione += direzione * scala.x;
+
+
+        CharacterController cc = GetComponent<CharacterController>();
+        cc.enabled = false;     //blocca il teletrasporto da un punto all' altro
 
         //lo posiziona
         posizione.y = 1f;
@@ -34,14 +51,8 @@ public class Spawn : MonoBehaviour
 
         //gira il player verso l'interno del labirinto
         transform.rotation = Quaternion.LookRotation(-direzione);
-    }
 
-    private async Task AspettaGenerazioneLabirinto()
-    {
-        while(GeneratoreLabirinito.CellaEntrata == null)
-        {
-            await Task.Yield();
-        }
+        cc.enabled = true;
     }
 
     // Update is called once per frame
