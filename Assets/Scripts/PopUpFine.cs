@@ -5,12 +5,13 @@ using UnityEngine.SceneManagement;
 public class PopUpFine : MonoBehaviour
 {
     [SerializeField] GameObject popup;
-    [SerializeField] Restart restart;
+    //[SerializeField] Restart restart;
     public void PremutoSi()
     {
         Debug.Log("Premuto SI");
         popup.SetActive(false);
-        restart.EffettuaRestart();
+        SceneManager.LoadScene(0);
+        //restart.EffettuaRestart();
 
     }
     public void PremutoNo()
@@ -26,7 +27,8 @@ public class PopUpFine : MonoBehaviour
 
     private void Start()
     {
-        popup.SetActive(false);
+        //Mostra();
+        //popup.SetActive(false);
     }
 
 }

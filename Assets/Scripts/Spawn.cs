@@ -1,63 +1,49 @@
 using UnityEngine;
 using System.Threading.Tasks;
+using System;
 
 public class Spawn : MonoBehaviour
 {
     [SerializeField] MazeGenerator GeneratoreLabirinito;
+    [SerializeField] MazeRenderGraphic renderGraphic;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    void Awake()
     {
-        EseguiSpawn();
-
+        //GeneratoreLabirinito.LabirintoGenerato += OnLabirintoGenerato;
+        renderGraphic.GraficaPronta += OnGraficaPronta;     //per comodità di generazione (prefab con scale diverse da 1x11x)
+                                                            //uso direttamente la posizione reale e non quella logica
+        //EseguiSpawn();
     }
 
-    private async Task AspettaGenerazioneLabirinto()
+    //private async Task AspettaGenerazioneLabirinto()
+    //{
+    //    while (GeneratoreLabirinito.CellaEntrata == null || renderGraphic.CellaEntrata==null)
+    //        await Task.Yield();
+    //}
+
+    private void OnGraficaPronta(object sender, EventArgs e)
     {
-        while(GeneratoreLabirinito.CellaEntrata == null)
-        {
-            await Task.Yield();
-        }
+        Spawna();
     }
 
-    public async Task EseguiSpawn()
+    public void Spawna()
     {
-        await AspettaGenerazioneLabirinto();
-
-        Cella entrata = GeneratoreLabirinito.CellaEntrata;
-        Vector3 scala = GeneratoreLabirinito.transform.lossyScale;
-        Vector3 direzione = Vector3.zero;   //obbligatoria assegnarla al'inizio
-
-        if (entrata.x == 0) direzione = Vector3.left;
-        else if (entrata.x == GeneratoreLabirinito.larghezza - 1) direzione = Vector3.right;
-        else if (entrata.z == 0) direzione = Vector3.back;
-        else if (entrata.z == GeneratoreLabirinito.lunghezza - 1) direzione = Vector3.forward;
-
-        //posizione della cella di entrata
-        Vector3 posizione = new Vector3(entrata.x * scala.x, 0, entrata.z * scala.z);
-        //sposta di una cella verso l’esterno
-        posizione += direzione * scala.x;
-
-
+        Vector3 posizione = renderGraphic.posizioneEntrata;
+        // alza un po’ il player
+        posizione.y += 1f;
         CharacterController cc = GetComponent<CharacterController>();
-        cc.enabled = false;     //blocca il teletrasporto da un punto all' altro
-
-        //lo posiziona
-        posizione.y = 1f;
-
-
+        cc.enabled = false; 
         transform.position = posizione;
-
-
-        //gira il player verso l'interno del labirinto
+        // guarda verso l'interno del labirinto
+        Vector3 direzione = renderGraphic.direzioneEntrata;
         transform.rotation = Quaternion.LookRotation(-direzione);
-
         cc.enabled = true;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    //public async Task EseguiSpawn()
+    //{
+    //    await AspettaGenerazioneLabirinto();
+
+
+    //}
 }
