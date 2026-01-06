@@ -76,6 +76,8 @@ public class SwitchTelecamere : MonoBehaviour
             rotazione = Mathf.Clamp(rotazione, -70f, 70f);  //limita il valore tra + e - 70
 
             //applica la rotazione solo su asse X dei gradi stabiliti dal caloclo sopra
+
+            //local rotation tiene conto in maniera relativa del transfrom del parent e quindi non sono rotazioni globali ma basate sul player
             primaPersona.transform.localRotation = Quaternion.Euler(rotazione, 0f, 0f);    
         }
 

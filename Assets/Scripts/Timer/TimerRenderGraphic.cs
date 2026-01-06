@@ -25,7 +25,8 @@ public class TimerRenderGraphic : MonoBehaviour
         int minuti = (int)Math.Floor(timer.tempo/60);
         int secondi = (int)Math.Floor(timer.tempo % 60);
 
-        testo.text = $"Tempo totale: {minuti}:{secondi}";
+        //forma formattazione con 2 cifre quindi sarebbe tipo 03:04 e non 3;4
+        testo.text = $"Tempo totale: {minuti:00}:{secondi:00}";
         testo.gameObject.SetActive(true);   //lo include nella scena
         aspettaCliclPerRigenerareDaCapo =true;
     }

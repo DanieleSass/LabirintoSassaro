@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CellaEntrataUscita : MonoBehaviour
 {
-
+    //celle trasparente attorni all'entrata e all' uscita
     [SerializeField] GameObject MuroDestro;
     [SerializeField] GameObject MuroSinistro;
     [SerializeField] GameObject MuroAnteriore;

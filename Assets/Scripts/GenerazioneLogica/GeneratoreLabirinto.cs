@@ -74,6 +74,8 @@ public class MazeGenerator : MonoBehaviour
         
         //quando finisce la chiamata della funzione qui sopra (pk prossima==null)allora torna indietro di una cella
         //e cerca verso un' altra direzione, e se non c'è tornerà indietro
+
+        //segnala che ha esplorato tutto da attuale e che torna indietro per vedere se magari ci sono altre direzioni da provate
         GeneraLabirinto(precedente, attuale);
     }
 

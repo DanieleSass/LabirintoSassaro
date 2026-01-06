@@ -59,6 +59,7 @@ public class MazeRenderGraphic : MonoBehaviour
                 //copia dati logici e dopo grafica
                 cellaLogica = percorso[x, z];
 
+
                 cellaGrafica.Visitata = cellaLogica.Visitata;
                 cellaGrafica.Muro_Sinistro = cellaLogica.Muro_Sinistro;
                 cellaGrafica.Muro_Destro = cellaLogica.Muro_Destro;
@@ -154,6 +155,7 @@ public class MazeRenderGraphic : MonoBehaviour
 
         Vector3 dir = Vector3.forward;
 
+        //per farlo orientare sempre nella maniera più giusta
         if (!cella.Muro_Anteriore || !cella.Muro_Posteriore)
             dir = Vector3.right;
         else if (!cella.Muro_Destro || !cella.Muro_Sinistro)

@@ -27,6 +27,8 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         controller= GetComponent<CharacterController>();
+
+        //inchildren perchè animator è sul player grafico, figlio del contenitore che ha script
         animator = GetComponentInChildren<Animator>();
 
 
