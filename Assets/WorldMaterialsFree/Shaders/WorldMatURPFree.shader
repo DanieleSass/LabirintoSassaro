@@ -17,7 +17,7 @@ Shader "WorldMatURPFree"
 		_Height("Height", 2D) = "white" {}
 		_HeightDisplacement("Height Displacement", Range( 0 , 1)) = 0
 		_AO("AO", 2D) = "white" {}
-		[ASEEnd]_Tile("Tile", Range( 0.1 , 10)) = 1
+		[ASEEnd]_Tile("Tile", Range( 0.1 , 40)) = 1
 
 		//_TransmissionShadow( "Transmission Shadow", Range( 0, 1 ) ) = 0.5
 		//_TransStrength( "Trans Strength", Range( 0, 50 ) ) = 1
