@@ -21,8 +21,11 @@ public class TimerRenderGraphic : MonoBehaviour
 
 
     private void OnTimerFinito(object sender, EventArgs e)
-    {      
-        testo.text = $"Tempo totale: {timer.tempo}";
+    {
+        int minuti = (int)Math.Floor(timer.tempo/60);
+        int secondi = (int)Math.Floor(timer.tempo % 60);
+
+        testo.text = $"Tempo totale: {minuti}:{secondi}";
         testo.gameObject.SetActive(true);   //lo include nella scena
         aspettaCliclPerRigenerareDaCapo =true;
     }

@@ -33,8 +33,20 @@ public class Timer : MonoBehaviour
             }
             else    // al primo movimento ancora da fare
             {
-                if(player.transform.position != mazeRenderGraphic.posizioneEntrata) //si è spostato allora parte tutto
+                //il Raw lo fa senza robe che ammorbidiscono, prende input diretto = 1 senza farlo graduale
+                float x = Input.GetAxisRaw("Horizontal");
+                float z = Input.GetAxisRaw("Vertical");
+
+                if (x != 0 || z!=0)
+                {
+                    //si è spostato allora parte tutto
                     primoMovimentoFatto = true;
+                    Debug.Log("partito");
+                }
+
+                
+
+
             }
         }
     }
