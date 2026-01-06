@@ -11,13 +11,13 @@ public class SpawnCollezzionabili : MonoBehaviour
 
     public event EventHandler CollezzionabiliGenerati;  
 
-    public List<GeneratoreCella> celleGiaOccupate { get; set; }
-    public int numeroMoneteDaSpawnare { get; set; }
+    public List<GeneratoreCella> celleGiaOccupate { get; set; } //serve per lo spawn dei portali e per la grafica da istanziare
+    public int numeroMoneteDaSpawnare { get; set; } //serve per la grafica e la cond di win
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
-        generatore.LabirintoGenerato += OnLabirintoGenerato;
+        generatore.LabirintoGenerato += OnLabirintoGenerato;    //appena il labirinto logico è pronto allora butta giù le monete
     }
 
     private void OnLabirintoGenerato(object sender, EventArgs e)
@@ -29,9 +29,9 @@ public class SpawnCollezzionabili : MonoBehaviour
         int larghezza = generatore.larghezza;
         int lunghezza = generatore.lunghezza;
 
-        int totcelle = larghezza * lunghezza;
+        int totcelle = larghezza * lunghezza;   //area
         //proporzionale alla grandezza del labirinto, una ogni 20 celle
-        numeroMoneteDaSpawnare = Math.Max(1, totcelle/20);   //almeno una moneta da mettere gi
+        numeroMoneteDaSpawnare = Math.Max(1, totcelle/20);   //almeno una moneta da mettere giu
 
         celleGiaOccupate = new();  //per evitare che spawnino nella stessa cella
 
@@ -52,7 +52,7 @@ public class SpawnCollezzionabili : MonoBehaviour
         }
         Debug.Log("Monete generate: " + celleGiaOccupate.Count);
 
-        //a sua volta dopo che sono spawnate queste aggiorna tutta la grafica
+        //a sua volta dopo che sono spawnate queste butta giu i portali
         CollezzionabiliGenerati?.Invoke(this, EventArgs.Empty);
         //per renderizzarle graficamente ci pensa il mazerendergraphic
 
@@ -60,10 +60,17 @@ public class SpawnCollezzionabili : MonoBehaviour
 
     private bool CheckcellaLibera(GeneratoreCella cella)
     {
-        if (celleGiaOccupate.Contains(cella))
-            return false;   //falso se già occupata
-        else
-            return true;
+        //if (celleGiaOccupate.Contains(cella))
+        //    return false;   //falso se già occupata
+        //else
+        //    return true;
+
+        foreach(GeneratoreCella cellaa in celleGiaOccupate)
+        {
+            if (cella.x == cellaa.x && cella.z == cellaa.z)
+                return false;
+        }
+        return true;
     }
 
 

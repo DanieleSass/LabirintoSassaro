@@ -15,12 +15,6 @@ public class Spawn : MonoBehaviour
         //EseguiSpawn();
     }
 
-    //private async Task AspettaGenerazioneLabirinto()
-    //{
-    //    while (GeneratoreLabirinito.CellaEntrata == null || renderGraphic.CellaEntrata==null)
-    //        await Task.Yield();
-    //}
-
     private void OnGraficaPronta(object sender, EventArgs e)
     {
         Spawna();
@@ -31,19 +25,13 @@ public class Spawn : MonoBehaviour
         Vector3 posizione = renderGraphic.posizioneEntrata;
         // alza un po’ il player
         posizione.y += 1f;
-        CharacterController cc = GetComponent<CharacterController>();
+        CharacterController cc = GetComponent<CharacterController>();   //cc blocca il tp
         cc.enabled = false; 
         transform.position = posizione;
         // guarda verso l'interno del labirinto
         Vector3 direzione = renderGraphic.direzioneEntrata;
-        transform.rotation = Quaternion.LookRotation(-direzione);
+        transform.rotation = Quaternion.LookRotation(-direzione);   //bisogna invertire la posizione
         cc.enabled = true;
     }
 
-    //public async Task EseguiSpawn()
-    //{
-    //    await AspettaGenerazioneLabirinto();
-
-
-    //}
 }

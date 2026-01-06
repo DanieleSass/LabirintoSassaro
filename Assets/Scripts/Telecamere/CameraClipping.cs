@@ -3,112 +3,70 @@ using UnityEngine;
 public class CameraClipping : MonoBehaviour
 {
     [SerializeField] Transform player;
-    [SerializeField] LayerMask ostacoliLayer;
-    [SerializeField] Camera terzaPersona;
-    [SerializeField] Camera primaPersona;
+    [SerializeField] LayerMask ostacoliLayer;   //in verità tutto è costruito in Default, però la cam può colpire solo i muri perchè non si possono fare acrobazie con le camere
+
+    [SerializeField] float distanzaMinima = 1.2f;   //distanza minima consentita
 
     Vector3 offsetLocale;
 
-    public bool inClipping { get; set; }
-
-    bool eraInTerzaPersonaPrimaDelClipping;
-
-    public bool primaPersonaForzata {  get; set; }
+    //public bool inClipping { get; private set; }
+    //public bool primaPersonaForzata { get; set; }
 
     void Start()
     {
-        offsetLocale = transform.localPosition;
+        offsetLocale = transform.localPosition;     //distanza player-cam ideale
     }
 
-    void Update()
+    void LateUpdate()   //late dopo update del player
     {
-        //Vector3 targetPos = player.TransformPoint(offsetLocale);
+        //pos ideale, trasforma da posizione locale (offset di qualche unità in alto e indietro rispetto al player)
+        //a vere e proprie coordinate del mondo di gioco, non più relative al player ma iindipendenti
+        Vector3 posIdeale = player.TransformPoint(offsetLocale);
 
-        //if (Physics.Linecast(player.position, targetPos, out RaycastHit hit))
-        //{
-        //    Vector3 dir = (targetPos - player.position).normalized;
-        //    transform.position = hit.point - dir * 0.2f;
-        //    //targetPos = hit.point - dir * 0.2f;
-        //}
-        //else
-        //{
-        //    // torna rapidamente alla posizione ideale
-        //    transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 15f);
-        //}
+       //.normalized lo ridece a scala 1, cioè il valore massimo assunto può essere 1 e gli altri valori sono tra 0<=x<=1
+        Vector3 direzione = (posIdeale - player.position).normalized;
 
-        //// clipping = c’è un ostacolo tra player e posizione ideale   
-        //inClipping = Physics.Linecast(player.position, targetPos);
+        //prende la vera e propria distanza player-cam 
+        float distanzaFinale = Vector3.Distance(player.position, posIdeale);
 
-        //Debug.Log("inClipping = " + inClipping);
+        //linecast controlla se c’è un ostacolo
+        //se c'è qualcosa di layer ostacoliLayer(tutto) tra i primi 2 parametri, allora hit viene istanziata e valorizzato con info riguardo la collisione
 
-
-
-        Vector3 targetPos = player.TransformPoint(offsetLocale);
-        //if (Physics.Linecast(player.position, targetPos, out RaycastHit hit))
-        //{
-        //    float distanza = Vector3.Distance(hit.point, player.position);
-        //    inClipping = distanza < 1;
-        //}
-        //else
-        //    inClipping = false;
-
-        //Debug.Log("clipping" + inClipping);
-        float distanza;
-        if (Physics.Linecast(player.position, targetPos, out RaycastHit hit, ostacoliLayer))
+        if (Physics.Linecast(player.position, posIdeale, out RaycastHit hit, ostacoliLayer))
         {
-            //Debug.Log("Ostacolo rilevato: " + hit.collider.name);
-            distanza = Vector3.Distance(hit.point, player.position);
+            //se da true allora allora la aggiusta per evitare collisioni
+            //altimenti mantiene quella idelae
 
+            //inClipping = true;
 
-            if (distanza < 2)
+            float distanza = hit.distance;  //punto in cui ha colpito il muro
+
+            //se troppo vicino, allora mette quella di degault per evitare che la cam possa entrare dentro al player per esempio
+            if (distanza < distanzaMinima)
             {
-
-                primaPersonaForzata = true;
-                //eraInTerzaPersonaPrimaDelClipping = true;
-
-                ////terzaPersona.gameObject.SetActive(false);
-                ////primaPersona.gameObject.SetActive(true);
-
-                //terzaPersona.enabled = false;
-                //primaPersona.enabled = true;
-
-                return;
+                //primaPersonaForzata = true;
+                distanza = distanzaMinima;
             }
             //else
             //{
-            //    Debug.Log("Riattiva 3p");
-            //    if (eraInTerzaPersonaPrimaDelClipping)
-            //    {
-            //        eraInTerzaPersonaPrimaDelClipping = false;
-            //        primaPersona.gameObject.SetActive(false);
-            //        terzaPersona.gameObject.SetActive(true);
-            //    }
+            //    primaPersonaForzata = false;
             //}
 
-
-        }
-        else
-        {
-            Debug.Log("Riattiva 3p");
-            primaPersonaForzata = false;
-            ////if (eraInTerzaPersonaPrimaDelClipping)
-            ////{
-            //    eraInTerzaPersonaPrimaDelClipping = false;
-
-            //primaPersona.enabled=false;
-            //terzaPersona.enabled = true;
-               // primaPersona.gameObject.SetActive(false);
-                //terzaPersona.gameObject.SetActive(true);
-            //}
+            //avvicina la camera al punto di collisione leggermente in avanti per evitare che si veda il muro buggato
+            distanzaFinale = distanza - 0.1f;   
         }
         //else
         //{
-        //    terzaPersona.gameObject.SetActive(true);
-        //    Debug.Log("Nessun ostacolo rilevato");
-        //    //inClipping = false;
-
+        //    inClipping = false;
+        //    primaPersonaForzata = false;
         //}
 
+        //calcola la nuova posizione finale
+        Vector3 nuovaPos = player.position + direzione * distanzaFinale;
 
+        //movimento morbido, il *10 fa da fattore che ammorbidisce e rende più "gentile" il movimento, lo amplifica
+        transform.position = Vector3.Lerp(transform.position, nuovaPos, Time.deltaTime * 10);
     }
 }
+
+

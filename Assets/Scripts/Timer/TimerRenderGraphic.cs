@@ -15,23 +15,22 @@ public class TimerRenderGraphic : MonoBehaviour
     {
         testo = GetComponent<TMP_Text>();
         timer.TimerFinito += OnTimerFinito;
-        testo.gameObject.SetActive(false);
-        aspettaCliclPerRigenerareDaCapo = false;
+        testo.gameObject.SetActive(false);  //lo cancella dalla scena
+        aspettaCliclPerRigenerareDaCapo = false;    //prima di ricominciare aspetta che si clicki nello schermo
     }
 
 
     private void OnTimerFinito(object sender, EventArgs e)
-    {
-        
+    {      
         testo.text = $"Tempo totale: {timer.tempo}";
-        testo.gameObject.SetActive(true);
+        testo.gameObject.SetActive(true);   //lo include nella scena
         aspettaCliclPerRigenerareDaCapo =true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (aspettaCliclPerRigenerareDaCapo)
+        if (aspettaCliclPerRigenerareDaCapo)    //quando si arriva alla fine e quindi aspettaper... è true allora aspetta il click sx
         {
             if (Input.GetMouseButtonDown(0))    //prima di rigenerare tutto (e chiedere se si vuole rigiocare)
                                                 //aspetta un click del mouse

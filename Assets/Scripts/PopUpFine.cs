@@ -9,8 +9,8 @@ public class PopUpFine : MonoBehaviour
     public void PremutoSi()
     {
         Debug.Log("Premuto SI");
-        popup.SetActive(false);
-        SceneManager.LoadScene(0);
+        //popup.SetActive(false);
+        SceneManager.LoadScene(1);
         //restart.EffettuaRestart();
 
     }
@@ -20,10 +20,6 @@ public class PopUpFine : MonoBehaviour
         Application.Quit();
     }
 
-    public void Mostra()
-    {
-        popup.SetActive(true);
-    }
 
     private void Start()
     {

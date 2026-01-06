@@ -1,4 +1,3 @@
-using Unity.Cinemachine;
 using UnityEngine;
 
 public class SwitchTelecamere : MonoBehaviour
@@ -13,10 +12,8 @@ public class SwitchTelecamere : MonoBehaviour
     //bool sceltaUser;        //variabile di appoggio se è utente a voler cambiare prospettiva
     //inPrimaPesona invece viene cambiata anche in maniera forzata per cameraclipping
 
-    //bool inPrimaPersonaForzata;
-    bool eraInTerzaPersonaPrimaDelClipping;
 
-    float rotazione = 0f;
+    float rotazione = 0f;   //da salvare
 
     void Start()
     {
@@ -32,17 +29,17 @@ public class SwitchTelecamere : MonoBehaviour
     void LateUpdate()
     {
 
-        if (Input.GetKeyDown(KeyCode.F))    //se è voluto dall' utente cambia la sua idea
-                                            //ma non è detto che venga applicata per priorità di cameraclipping
+        if (Input.GetKeyDown(KeyCode.F))    //al premere di F cambia inquadratura
         {
-            inPrimaPersona = !inPrimaPersona;
+            inPrimaPersona = !inPrimaPersona;   //cambia stato
+            AggiornaCamere();
             //AggiornaCamere();
         }
 
-        bool effettivaPrimaPersona = inPrimaPersona || cameraClipping.primaPersonaForzata;
+        //bool effettivaPrimaPersona = inPrimaPersona || cameraClipping.primaPersonaForzata;
 
-        primaPersona.enabled = effettivaPrimaPersona;
-        terzaPersona.enabled =!effettivaPrimaPersona;
+        //primaPersona.enabled = effettivaPrimaPersona;
+        //terzaPersona.enabled =!effettivaPrimaPersona;
 
         //if (cameraClipping.inClipping)
         //{
@@ -70,15 +67,16 @@ public class SwitchTelecamere : MonoBehaviour
         //AggiornaCamere();
 
 
-        //si gira solo in 1persona
-        if (effettivaPrimaPersona)
+        //se è in 1persona allora può guardare più in su e in giu
+        if (primaPersona)
         {
-            float mouseY = Input.GetAxis("Mouse Y");
+            float mouseY = Input.GetAxis("Mouse Y");    //verso alto=positivo, verso basso=negativo
+            // -= perchè se mi muovo verso l' alto allora la prospettiva delle scendere verso il basso, invertito
             rotazione -= mouseY;
-            rotazione = Mathf.Clamp(rotazione, -70f, 70f);
+            rotazione = Mathf.Clamp(rotazione, -70f, 70f);  //limita il valore tra + e - 70
 
-            primaPersona.transform.localRotation =
-                Quaternion.Euler(rotazione, 0f, 0f);    
+            //applica la rotazione solo su asse X dei gradi stabiliti dal caloclo sopra
+            primaPersona.transform.localRotation = Quaternion.Euler(rotazione, 0f, 0f);    
         }
 
     }
@@ -90,6 +88,7 @@ public class SwitchTelecamere : MonoBehaviour
         //primaPersona.gameObject.SetActive(inPrimaPersona);
         //terzaPersona.gameObject.SetActive(!inPrimaPersona);
 
+        //non setactive false perchè sennò neanche gli script vanno più
         primaPersona.enabled = inPrimaPersona;
         terzaPersona.enabled = !inPrimaPersona;
     }

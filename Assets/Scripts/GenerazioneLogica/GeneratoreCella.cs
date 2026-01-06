@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class GeneratoreCella        //classe normale che non eredita monobehaviour, quindi può avere un costruttore normale che funzioni
-                                    //e non ha riferimenti grafici, solo logici
+public class GeneratoreCella        //classe normale che non eredita monobehaviour, quindi può avere un costruttore normale e con parametri
+                                    //che funzioni e non ha riferimenti grafici, solo logici
 {
-    public int x {  get; set; }
+    public int x {  get; set; } //unità di 1, sempre, perchè logica
     public int z { get; set; }
 
     public bool Visitata { get; set; }

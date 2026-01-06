@@ -5,119 +5,106 @@ using UnityEngine;
 
 public class MazeRenderGraphic : MonoBehaviour
 {
-    [SerializeField] MazeGenerator generatoreLogica;    //labirinto logico
-    [SerializeField] SpawnCollezzionabili collezzionabili;  //monete logiche
+    [SerializeField] MazeGenerator generatoreLogica;    //labirinto logico  (serve per posizioni)
+    [SerializeField] SpawnCollezzionabili collezzionabili;  //monete logiche (serve per posizioni)
 
+    [SerializeField] SpawnPortali portali;  //portali logici (serve per evento + posizioni)
+
+    //prefab da posizionare nella mappa
     [SerializeField] Cella cellaPrefab;
-    [SerializeField] GameObject entrataUscitaPrefab;
+    [SerializeField] CellaEntrataUscita entrataUscitaPrefab;
     [SerializeField] GameObject pressurePlatePrefab;
     [SerializeField] GameObject collezionabilePrefab;
+    [SerializeField] PortaleCollisione portaliPrefab;
 
-    public event EventHandler GraficaPronta;
+    public event EventHandler GraficaPronta;    //quando tutta la grafica è pronta, allora giu il player
+    //perchè per comodità uso le coordinate grafiche per posizionarlo con le due variabili qua sotto
     public Vector3 posizioneEntrata { get; set; }   //serve nello spawn quando viene invocato questo evento (del rendere grafico)
     public Vector3 direzioneEntrata { get; set; }   //idem
 
     void Awake()
     {
-        collezzionabili.CollezzionabiliGenerati += ImpostaGrafica;
+        portali.PortaliSpawnati += ImpostaGrafica;
+        //una volta determinate le posizioni di tutto allora disegna sulla mappa
+
+        //collezzionabili.CollezzionabiliGenerati += ImpostaGrafica;
     }
 
     public void ImpostaGrafica(object sender, EventArgs e)
     {
-        //cancella vecchia grafica
+        //cancella vecchia grafica, serviva quando gestivo tutto con unica scena puliva tutti i child del generatore di labirinti (tutti i gameobject quindi)
         foreach (Transform t in transform)
             Destroy(t.gameObject);
-
-        //LOGICA
+        
+        //comodità lettura/scrittura
         GeneratoreCella[,] percorso = generatoreLogica.percorso;
         int lunghezza = generatoreLogica.lunghezza;
         int larghezza = generatoreLogica.larghezza;
+    
+        //il fattore per cui moltiplicherò tutto quando istanzio, per avere un' unica scala
+        //siccome è un cubo è anche uguale a quella z per esempio ( e anche y)
+        float scalaCella = cellaPrefab.transform.localScale.x;
 
-        // *** FIX: usa la scala del prefab, non del parent ***
-        float cellSize = cellaPrefab.transform.localScale.x;
-
-        // COSTRUZIONE CELLE GRAFICHE
+        //celle grafiche
+        Vector3 posizione;
+        Cella cellaGrafica;
+        GeneratoreCella cellaLogica;
         for (int x = 0; x < larghezza; x++)
         {
             for (int z = 0; z < lunghezza; z++)
             {
-                Vector3 posizione = new Vector3(x * cellSize, 0, z * cellSize);
-
-                Cella cellaGrafica = Instantiate(cellaPrefab, posizione, Quaternion.identity, transform);
+                posizione = new Vector3(x * scalaCella, 0, z * scalaCella);
+                cellaGrafica = Instantiate(cellaPrefab, posizione, Quaternion.identity, transform);
 
                 //copia dati logici e dopo grafica
-                GeneratoreCella logica = percorso[x, z];
+                cellaLogica = percorso[x, z];
 
-                cellaGrafica.x = logica.x;
-                cellaGrafica.z = logica.z;
-
-                cellaGrafica.Visitata = logica.Visitata;
-                cellaGrafica.Muro_Sinistro = logica.Muro_Sinistro;
-                cellaGrafica.Muro_Destro = logica.Muro_Destro;
-                cellaGrafica.Muro_Anteriore = logica.Muro_Anteriore;
-                cellaGrafica.Muro_Posteriore = logica.Muro_Posteriore;
+                cellaGrafica.Visitata = cellaLogica.Visitata;
+                cellaGrafica.Muro_Sinistro = cellaLogica.Muro_Sinistro;
+                cellaGrafica.Muro_Destro = cellaLogica.Muro_Destro;
+                cellaGrafica.Muro_Anteriore = cellaLogica.Muro_Anteriore;
+                cellaGrafica.Muro_Posteriore = cellaLogica.Muro_Posteriore;
 
                 cellaGrafica.AggiornaGrafica();
             }
         }
 
-        // --- ENTRATA ---
+        //entrata
         GeneratoreCella entrata = generatoreLogica.CellaEntrata;
-        posizioneEntrata = new Vector3(entrata.x * cellSize, 0, entrata.z * cellSize);
+        posizioneEntrata = new Vector3(entrata.x * scalaCella, 0, entrata.z * scalaCella);
+        //calcola direzione verso l'esterno
+        direzioneEntrata = DeterminaDirezioneEntrataUscita(entrata, larghezza,lunghezza);
+        //sposta di una cella verso l'esterno, moltiplica per il fattore così da renderlo scalato al mondo
+        posizioneEntrata += direzioneEntrata * scalaCella;  //+= perchè vettore.qualcosa ha già direzione con segno +-
 
-        // calcola direzione verso l'esterno
-        //direzioneEntrata = Vector3.zero;
-        if (entrata.x == 0)
-            direzioneEntrata = Vector3.left;
-        else if (entrata.x == larghezza - 1)
-            direzioneEntrata = Vector3.right;
-        else if (entrata.z == 0) 
-            direzioneEntrata = Vector3.back;
-        else if (entrata.z == lunghezza - 1) 
-            direzioneEntrata = Vector3.forward;
-
-        // sposta di una cella verso l'esterno
-        posizioneEntrata += direzioneEntrata * cellSize;
-
-        GameObject CellaEntrata = Instantiate(entrataUscitaPrefab, posizioneEntrata, Quaternion.identity, transform);
-
-        CellaEntrataUscita graficaEntrata = CellaEntrata.GetComponent<CellaEntrataUscita>();
-        graficaEntrata.TogliMuro(direzioneEntrata);
+        CellaEntrataUscita CellaEntrata = Instantiate(entrataUscitaPrefab, posizioneEntrata, Quaternion.identity, transform);
+        CellaEntrata.TogliMuro(direzioneEntrata);
 
 
-
-        // --- USCITA ---
+        //uscita   
         GeneratoreCella uscita = generatoreLogica.CellaUscita;
-        Vector3 posUscita = new Vector3(uscita.x * cellSize, 0, uscita.z * cellSize);
+        Vector3 posUscita = new Vector3(uscita.x * scalaCella, 0, uscita.z * scalaCella);
+        Vector3 dirUscita = DeterminaDirezioneEntrataUscita(uscita, larghezza, lunghezza);
 
-        Vector3 dirUscita = Vector3.zero;
-        if (uscita.x == 0) dirUscita = Vector3.left;
-        else if (uscita.x == larghezza - 1) dirUscita = Vector3.right;
-        else if (uscita.z == 0) dirUscita = Vector3.back;
-        else if (uscita.z == lunghezza - 1) dirUscita = Vector3.forward;
+        posUscita += dirUscita * scalaCella;
 
-        posUscita += dirUscita * cellSize;
+        CellaEntrataUscita uscitaMuroDaTogliere = Instantiate(entrataUscitaPrefab, posUscita, Quaternion.identity, transform);
+        uscitaMuroDaTogliere.TogliMuro(dirUscita);
+        
 
-        GameObject uscitaMuroDaTogliere = Instantiate(entrataUscitaPrefab, posUscita, Quaternion.identity, transform);
-
-        CellaEntrataUscita graficaUscita = uscitaMuroDaTogliere.GetComponent<CellaEntrataUscita>();
-        graficaUscita.TogliMuro(dirUscita);
-
-
-
-        // pressure plate sopra l’uscita
-
+        //pressure plate sopra l’uscita
         Vector3 posPressurePlate = posUscita;
         posPressurePlate.y = 0.10f;
 
         Instantiate(pressurePlatePrefab, posPressurePlate, Quaternion.identity, transform);
         
-            //PRESSURE PLATE HA COLLIDER MAGGIORE DI QUELLO REALMENTE VISIBILE VIA GRAFICA PERCHè SENNò CC NON TOCCA E NON PARTE TRIGGER
+        //PRESSURE PLATE HA COLLIDER MAGGIORE DI QUELLO REALMENTE VISIBILE VIA GRAFICA PERCHè SENNò CC NON TOCCA E NON PARTE TRIGGER
 
 
         if (collezzionabili.celleGiaOccupate == null || collezzionabili.celleGiaOccupate.Count == 0)
         {
             Debug.Log("nessuna cella occupata no monete da disegnare");
+            GraficaPronta?.Invoke(this, EventArgs.Empty);   //dopo spawna player
             return;
         }
 
@@ -125,12 +112,56 @@ public class MazeRenderGraphic : MonoBehaviour
         Vector3 posCollezzionabili;
         foreach (GeneratoreCella cella in collezzionabili.celleGiaOccupate)
         {
-            posCollezzionabili = new Vector3(cella.x * cellSize, 0.7f, cella.z * cellSize);
+            posCollezzionabili = new Vector3(cella.x * scalaCella, 0.7f, cella.z * scalaCella);
             GameObject moneta = Instantiate(collezionabilePrefab, posCollezzionabili, Quaternion.identity, transform);
         }
 
 
-        GraficaPronta?.Invoke(this, EventArgs.Empty);
+        //portali    
+        GeneratoreCella cella1 = portali.celleOccupate[0];
+        GeneratoreCella cella2 = portali.celleOccupate[1];
+
+        PortaleCollisione portale1 = CreaPortale(cella1, scalaCella);
+        PortaleCollisione portale2 = CreaPortale(cella2 , scalaCella);
+
+        portale1.destinazione = portale2.transform;
+        portale1.altroPortale = portale2; 
+
+        portale2.destinazione = portale1.transform;
+        portale2.altroPortale=portale1;
+
+        GraficaPronta?.Invoke(this, EventArgs.Empty);   //dopo spawna player
 
     }
+
+    private Vector3 DeterminaDirezioneEntrataUscita(GeneratoreCella cella, int larghezza, int lunghezza)
+    {
+        if (cella.x == 0)
+            return Vector3.left;    //vettori di un'unità che indicano direzione
+        else if (cella.x == larghezza - 1)
+            return Vector3.right;
+        else if (cella.z == 0)
+            return Vector3.back;
+        else if(cella.z==lunghezza - 1)
+         return Vector3.forward;
+
+        return Vector3.zero;
+    }
+
+    private PortaleCollisione CreaPortale(GeneratoreCella cella, float scala)
+    {
+        Vector3 pos = new Vector3(cella.x * scala, 0, cella.z * scala);
+
+        Vector3 dir = Vector3.forward;
+
+        if (!cella.Muro_Anteriore || !cella.Muro_Posteriore)
+            dir = Vector3.right;
+        else if (!cella.Muro_Destro || !cella.Muro_Sinistro)
+            dir = Vector3.forward;
+
+        Quaternion rot = Quaternion.LookRotation(dir);
+        PortaleCollisione portale = Instantiate(portaliPrefab, pos, rot, transform);
+        return portale;
+    }
+
 }

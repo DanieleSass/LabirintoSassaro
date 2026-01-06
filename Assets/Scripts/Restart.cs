@@ -12,7 +12,7 @@ public class Restart : MonoBehaviour
     [SerializeField] Spawn spawn;
     [SerializeField] Timer timer;
 
-    private void Start()
+    private void Start()    //non serve awake perchè sicura arriva alla fine dopo un bel po'
     {        
         player.ArrivatoAllaFine += OnFine;
     }
@@ -29,19 +29,8 @@ public class Restart : MonoBehaviour
 
     public void ScenaSuccessiva()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(2);  //carica se si vuole giocare ancora oppure no
+
     }
 
-
-    //public void EffettuaRestart()
-    //{
-    //    //generatoreLabirinto.CellaEntrata = null;
-    //    generatoreLabirinto.GeneraLogica();
-
-    //    //rendererGrafico.ImpostaGrafica();
-    //    spawn.Spawna();
-    //    //await spawn.EseguiSpawn();
-    //    //Vector3 pos = generatoreLabirinto.CellaEntrata.transform.position; 
-    //    //player.transform.position = pos; 
-    //}
 }

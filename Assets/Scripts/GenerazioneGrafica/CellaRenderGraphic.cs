@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Cella : MonoBehaviour
 {
-    [SerializeField] GameObject MuroDestro;
+    [SerializeField] GameObject MuroDestro; //riferimenti grafici
 
     [SerializeField] GameObject MuroSinistro;
 
@@ -12,9 +12,6 @@ public class Cella : MonoBehaviour
 
     [SerializeField] GameObject BloccoNONVisitato;
 
-
-    public int x { get; set; }
-    public int z { get; set; }
     public bool Visitata { get; set; }
 
     public bool Muro_Sinistro { get; set; }
@@ -24,7 +21,7 @@ public class Cella : MonoBehaviour
 
 
     //così da tenere separata logica e grafica
-    public void AggiornaGrafica()
+    public void AggiornaGrafica()       //qua applica la logica alla grafica, chiamato nel maze render graphic
     {
         MuroDestro.SetActive(Muro_Destro);
         MuroSinistro.SetActive(Muro_Sinistro);

@@ -34,7 +34,7 @@ public class Timer : MonoBehaviour
             else    // al primo movimento ancora da fare
             {
                 if(player.transform.position != mazeRenderGraphic.posizioneEntrata) //si è spostato allora parte tutto
-                primoMovimentoFatto = true;
+                    primoMovimentoFatto = true;
             }
         }
     }

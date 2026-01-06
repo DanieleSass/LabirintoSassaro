@@ -1,8 +1,11 @@
 using UnityEngine;
 
 public class CollezzionabileCollisione : MonoBehaviour
+
+
+    //PREFAB DI MONETE, PORTALI, AMBIENTAZIONE SONO TUTTI SCARICATI DA INTERNET, ANCHE SAGOMA PLAYER
 {
-    InventarioCollezzionabili player;
+    InventarioCollezzionabili player;   //è un prefab quindi prendo il riferimento via codice (nello start)
     private void OnTriggerEnter(Collider other)
     {
 
@@ -12,7 +15,7 @@ public class CollezzionabileCollisione : MonoBehaviour
         if (other.CompareTag("Player")) //se player va addosso allora la toglie
         {
             player.CatturaCollezzionabile();
-            Destroy(this.gameObject);
+            Destroy(this.gameObject);   //toglie la moneta dal gioco
             Debug.Log("moneta raccoltta");
 
         }
