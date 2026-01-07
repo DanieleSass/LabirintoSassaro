@@ -36,9 +36,10 @@ public class TimerRenderGraphic : MonoBehaviour
     {
         if (aspettaCliclPerRigenerareDaCapo)    //quando si arriva alla fine e quindi aspettaper... è true allora aspetta il click sx
         {
-            if (Input.GetMouseButtonDown(0))    //prima di rigenerare tutto (e chiedere se si vuole rigiocare)
+            if (Input.GetMouseButtonUp(0))    //prima di rigenerare tutto (e chiedere se si vuole rigiocare)
                                                 //aspetta un click del mouse
             {
+                Input.ResetInputAxes();     //butta via il click
                 restart.ScenaSuccessiva();
             }
         }
