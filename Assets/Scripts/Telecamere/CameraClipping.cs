@@ -66,6 +66,8 @@ public class CameraClipping : MonoBehaviour
 
         //movimento morbido, il *10 fa da fattore che ammorbidisce e rende più "gentile" il movimento, lo amplifica
         transform.position = Vector3.Lerp(transform.position, nuovaPos, Time.deltaTime * 10);
+
+        //ogni frame la camera si sposta del t% (3 param) della distanza rimanente verso la posizione finale
     }
 }
 

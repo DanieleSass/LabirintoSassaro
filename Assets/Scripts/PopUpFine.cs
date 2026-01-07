@@ -9,6 +9,8 @@ public class PopUpFine : MonoBehaviour
     public void PremutoSi()
     {
         Debug.Log("Premuto SI");
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         //popup.SetActive(false);
         SceneManager.LoadScene(1);
         //restart.EffettuaRestart();

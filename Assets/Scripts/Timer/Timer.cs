@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using UnityEngine;
 
 public class Timer : MonoBehaviour
@@ -12,6 +13,8 @@ public class Timer : MonoBehaviour
 
     bool primoMovimentoFatto;
     bool timerAttivo;
+
+    Vector3 posPrecedente;
     public float tempo { get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -22,6 +25,16 @@ public class Timer : MonoBehaviour
         timerAttivo = true;
     }
 
+    private void Awake()
+    {
+        player.PlayerSpawnato += OnPlayerSpawnato;
+    }
+
+
+    private void OnPlayerSpawnato(object sender, EventArgs e)
+    {
+        posPrecedente = player.transform.position;
+    }
     // Update is called once per frame
     void Update()
     {
@@ -33,19 +46,22 @@ public class Timer : MonoBehaviour
             }
             else    // al primo movimento ancora da fare
             {
-                //il Raw lo fa senza robe che ammorbidiscono, prende input diretto = 1 senza farlo graduale
-                float x = Input.GetAxisRaw("Horizontal");
-                float z = Input.GetAxisRaw("Vertical");
+                //tocca controllare componente X e Z perchè la y è leggermente sfalsata da cc e skin widht
 
-                if (x != 0 || z!=0)
+
+                Vector2 posAttualeXZ = new Vector2(player.transform.position.x, player.transform.position.z);
+                Vector2 posPrecedenteXZ = new Vector2(posPrecedente.x, posPrecedente.z);
+
+                Debug.Log(posAttualeXZ);
+                Debug.Log(posPrecedenteXZ);
+
+                if (Vector2.Distance(posAttualeXZ, posPrecedenteXZ) > 0.01) //per evitare sfasamenti al millimetro
                 {
-                    //si è spostato allora parte tutto
                     primoMovimentoFatto = true;
-                    Debug.Log("partito");
+                    Debug.Log("TIMER: primo movimento rilevato");
                 }
 
-                
-
+                posPrecedente = player.transform.position;
 
             }
         }

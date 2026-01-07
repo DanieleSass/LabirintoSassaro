@@ -29,6 +29,8 @@ public class Restart : MonoBehaviour
 
     public void ScenaSuccessiva()
     {
+        Cursor.lockState = CursorLockMode.None; 
+        Cursor.visible = true;
         SceneManager.LoadScene(2);  //carica se si vuole giocare ancora oppure no
 
     }
